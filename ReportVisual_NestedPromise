@@ -1,0 +1,49 @@
+var report =  powerbi.embed(embedContainer, config);
+
+      var promisePageData = new Promise((resolve, reject) => {
+            report.on("rendered", function(){
+                report.getPages().then(function(pages){
+                    resolve(pages);
+                })
+            });
+      });
+
+     async function reportPages(pages){
+        var pagesData = [];
+        pages.forEach(pageData => {
+            var pages = {
+                'displayName' :  pageData.displayName,
+                'visual'      :  reportVisual(pageData)
+            };
+            pagesData.push(pages);
+        });
+        console.log("Pages Data",pagesData);
+        return pagesData;
+      };
+
+      async function reportVisual(pages){
+        var visualArray = [];
+          pages.getVisuals().then(function(visuals){
+            
+            visuals.forEach(visual => {
+                var visualData = {
+                    title : visual.title,
+                    name : visual.name,
+                    type : visual.type,
+                    page : {
+                        'PageName': pages.name,
+                        'PageDisplayName': pages.displayName
+                    }
+                };
+                visualArray.push(visualData);
+            });
+          });
+          console.log(visualArray);
+          return visualArray;
+      }
+
+      promisePageData.then((promisePageData) => {
+       return reportPages(promisePageData);
+      }).then(response => {
+          console.log("promise response",response);
+      });
